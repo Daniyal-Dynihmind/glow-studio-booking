@@ -1,1 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Online Booking</title>
+  <meta name="description" content="Book your appointment online in a few clicks." />
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body>
+
+  <!-- ============ HEADER ============ -->
+  <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-100">
+    <div class="max-w-6xl mx-auto flex items-center justify-between px-5 py-4">
+      <div class="flex items-center gap-3">
+        <div id="brandIcon" class="brand-icon"></div>
+        <div class="leading-tight">
+          <p id="brandName" class="font-extrabold text-slate-900 text-lg"></p>
+          <p id="brandType" class="text-xs text-slate-500"></p>
+        </div>
+      </div>
+      <a id="headerPhone" href="#" class="hidden sm:inline-flex items-center gap-2 text-sm font-semibold text-slate-700 hover:text-accent transition">
+        <i data-lucide="phone" class="w-4 h-4"></i> <span id="headerPhoneText"></span>
+      </a>
+    </div>
+  </header>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero px-5 pt-14 pb-24">
+    <div class="max-w-4xl mx-auto text-center relative z-10">
+      <h1 id="heroTitle" class="text-3xl md:text-5xl font-extrabold text-slate-900 leading-tight"></h1>
+      <p id="heroTag" class="mt-4 text-slate-600 max-w-2xl mx-auto"></p>
+
+      <div class="mt-8 flex flex-wrap justify-center gap-3 text-sm">
+        <span class="chip"><i data-lucide="clock" class="w-4 h-4"></i> <span id="chipHours"></span></span>
+        <span class="chip"><i data-lucide="timer" class="w-4 h-4"></i> <span id="chipSlot"></span></span>
+        <span class="chip"><i data-lucide="map-pin" class="w-4 h-4"></i> <span id="chipAddress"></span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ BOOKING AREA ============ -->
+  <main class="max-w-6xl mx-auto px-5 -mt-16 relative z-10 pb-20 grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+    <div class="lg:col-span-2 space-y-8">
+
+      <!-- Step 1: Service -->
+      <section class="card p-6 md:p-8">
+        <div class="step-head"><span class="step-no">1</span><div><h2 class="font-bold text-slate-900 text-lg">Choose a service</h2><p class="text-sm text-slate-500">Select what you need today.</p></div></div>
+        <div id="serviceGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6"></div>
+      </section>
+
+      <!-- Step 2: Date & Time -->
+      <section class="card p-6 md:p-8">
+        <div class="step-head"><span class="step-no">2</span><div><h2 class="font-bold text-slate-900 text-lg">Pick a date and time</h2><p class="text-sm text-slate-500">Only free slots are shown.</p></div></div>
+
+        <div class="mt-6">
+          <label class="label">Date</label>
+          <input id="dateInput" type="date" class="input max-w-xs" />
+        </div>
+
+        <p id="slotNote" class="text-sm text-slate-500 mt-6"></p>
+        <div id="slotGrid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 mt-3"></div>
+      </section>
+
+      <!-- Step 3: Details -->
+      <section class="card p-6 md:p-8">
+        <div class="step-head"><span class="step-no">3</span><div><h2 class="font-bold text-slate-900 text-lg">Your details</h2><p class="text-sm text-slate-500">We will use this to confirm your booking.</p></div></div>
+
+        <form id="bookingForm" class="grid grid-cols-1 md:grid-cols-2 gap-5 mt-6">
+          <div>
+            <label class="label">Full Name *</label>
+            <input name="name" required class="input" placeholder="Your full name" />
+          </div>
+          <div>
+            <label class="label">Phone *</label>
+            <input name="phone" required class="input" placeholder="+1 555 000 0000" />
+          </div>
+          <div class="md:col-span-2">
+            <label class="label">Email</label>
+            <input name="email" type="email" class="input" placeholder="you@email.com" />
+          </div>
+          <div class="md:col-span-2">
+            <label class="label">Notes (optional)</label>
+            <textarea name="notes" rows="3" class="input" placeholder="Anything we should know?"></textarea>
+          </div>
+          <div class="md:col-span-2 flex justify-end">
+            <button type="submit" class="btn-accent px-8 py-3.5 rounded-2xl font-semibold">Confirm Booking</button>
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <!-- ============ SUMMARY ============ -->
+    <aside class="lg:sticky lg:top-24 lg:self-start">
+      <div class="card p-6">
+        <h3 class="font-bold text-slate-900">Booking summary</h3>
+        <div class="mt-5 space-y-4 text-sm">
+          <div class="flex justify-between gap-4"><span class="text-slate-500">Service</span><span id="sumService" class="font-semibold text-slate-900 text-right">—</span></div>
+          <div class="flex justify-between gap-4"><span class="text-slate-500">Date</span><span id="sumDate" class="font-semibold text-slate-900 text-right">—</span></div>
+          <div class="flex justify-between gap-4"><span class="text-slate-500">Time</span><span id="sumTime" class="font-semibold text-slate-900 text-right">—</span></div>
+        </div>
+        <div class="border-t border-slate-100 mt-6 pt-5 flex justify-between items-center">
+          <span class="text-slate-500 font-medium">Total</span>
+          <span id="sumTotal" class="text-2xl font-extrabold text-slate-900">$0</span>
+        </div>
+        <p class="text-xs text-slate-400 mt-4">Pay at the venue. Free cancellation up to 24 hours before.</p>
+      </div>
+    </aside>
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="border-t border-slate-100 bg-white py-8 px-5">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3 text-sm text-slate-500">
+      <p id="footerName" class="font-semibold text-slate-700"></p>
+      <p>© 2026 · Online booking powered by ClientFlow</p>
+    </div>
+  </footer>
+
+  <!-- ============ SUCCESS MODAL ============ -->
+  <div id="successModal" class="modal">
+    <div class="card modal-panel p-8 max-w-md w-full text-center">
+      <div class="success-icon mx-auto"><i data-lucide="check" class="w-8 h-8 text-white"></i></div>
+      <h3 class="text-2xl font-extrabold text-slate-900 mt-5">Booking Received!</h3>
+      <p class="text-slate-500 mt-2 text-sm">Your reference code is</p>
+      <p id="refCode" class="text-xl font-extrabold text-accent mt-1 tracking-wider"></p>
+      <div id="successDetails" class="mt-6 text-left text-sm space-y-2 bg-slate-50 rounded-2xl p-5"></div>
+      <button id="closeSuccess" class="btn-accent w-full mt-6 py-3 rounded-2xl font-semibold">Done</button>
+    </div>
+  </div>
+
+  <div id="toastContainer" class="fixed bottom-6 right-6 z-[120] space-y-3"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
