@@ -1,1 +1,150 @@
+/* ===== Theme (colors come from CONFIG via JS) ===== */
+:root {
+  --accent: #e11d74;
+  --accent-soft: #fde7f1;
+  --accent-dark: #9d174d;
+}
 
+body {
+  font-family: 'Inter', sans-serif;
+  background: #fbfbfd;
+  color: #334155;
+}
+
+h1, h2, h3, .brand-name { font-family: 'Poppins', sans-serif; }
+.text-accent { color: var(--accent); }
+
+/* Soft hero background */
+.hero {
+  background:
+    radial-gradient(circle at 15% 20%, var(--accent-soft), transparent 45%),
+    radial-gradient(circle at 85% 0%, var(--accent-soft), transparent 40%),
+    linear-gradient(180deg, #ffffff 0%, #fbfbfd 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Brand logo box */
+.brand-icon {
+  width: 44px; height: 44px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+  box-shadow: 0 10px 25px -10px var(--accent);
+}
+
+/* Info chips in hero */
+.chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 14px; border-radius: 999px;
+  background: #ffffff; border: 1px solid #f1f5f9;
+  box-shadow: 0 4px 14px -8px rgba(15,23,42,0.15);
+  color: #334155; font-weight: 500;
+}
+.chip i { color: var(--accent); width: 16px; height: 16px; }
+
+/* Cards */
+.card {
+  background: #ffffff;
+  border: 1px solid #f1f5f9;
+  border-radius: 1.5rem;
+  box-shadow: 0 20px 50px -25px rgba(15,23,42,0.18);
+}
+
+/* Step heading */
+.step-head { display: flex; gap: 14px; align-items: flex-start; }
+.step-no {
+  width: 36px; height: 36px; border-radius: 12px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--accent-soft); color: var(--accent-dark);
+  font-weight: 800; font-family: 'Poppins', sans-serif;
+}
+
+/* Form fields */
+.label { display: block; font-size: 0.8rem; font-weight: 600; color: #475569; margin-bottom: 0.4rem; }
+.input {
+  width: 100%;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.9rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  color: #0f172a;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.input::placeholder { color: #94a3b8; }
+.input:focus {
+  outline: none;
+  background: #ffffff;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+textarea.input { resize: vertical; }
+
+/* Accent button */
+.btn-accent {
+  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+  color: #ffffff;
+  box-shadow: 0 12px 28px -12px var(--accent);
+  transition: transform 0.15s ease, filter 0.2s ease;
+}
+.btn-accent:hover { transform: translateY(-1px); filter: brightness(1.05); }
+.btn-accent:active { transform: scale(0.98); }
+
+/* Service cards */
+.service-card {
+  text-align: left;
+  padding: 1.25rem;
+  border-radius: 1.2rem;
+  border: 2px solid #f1f5f9;
+  background: #ffffff;
+  transition: all 0.2s ease;
+}
+.service-card:hover { border-color: var(--accent-soft); transform: translateY(-2px); box-shadow: 0 14px 30px -18px rgba(15,23,42,0.3); }
+.service-card.selected { border-color: var(--accent); background: var(--accent-soft); }
+.service-card .check {
+  width: 26px; height: 26px; border-radius: 999px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid #cbd5e1; color: transparent;
+}
+.service-card.selected .check { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* Time slots */
+.slot-btn {
+  padding: 0.7rem 0.4rem;
+  border-radius: 0.9rem;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #334155;
+  transition: all 0.15s ease;
+}
+.slot-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent-dark); }
+.slot-btn.selected { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 8px 18px -8px var(--accent); }
+.slot-btn:disabled { background: #f1f5f9; color: #cbd5e1; text-decoration: line-through; cursor: not-allowed; }
+
+/* Modal */
+.modal {
+  position: fixed; inset: 0; z-index: 100;
+  display: none; align-items: center; justify-content: center;
+  padding: 1rem; background: rgba(15,23,42,0.45); backdrop-filter: blur(4px);
+}
+.modal.open { display: flex; }
+.modal-panel { animation: pop 0.3s ease; }
+@keyframes pop {
+  from { opacity: 0; transform: translateY(14px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.success-icon {
+  width: 64px; height: 64px; border-radius: 999px;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #34d399, #10b981);
+  box-shadow: 0 12px 28px -10px #10b981;
+}
+
+/* Toast */
+.toast { animation: slideIn 0.3s ease; }
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(30px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
