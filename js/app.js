@@ -15,7 +15,7 @@ const CONFIG = {
   openTime: '10:00',     // opening time (24h format)
   closeTime: '20:00',    // closing time (24h format)
   slotMinutes: 60,       // gap between two slots (minutes)
-  closedDays: [0, 6],       // 0 = Sunday, 6 = Saturday
+  closedDays: [0],       // 0 = Sunday, 6 = Saturday
   icon: 'sparkles',
   accent: '#e11d74',
   accentSoft: '#fde7f1',
