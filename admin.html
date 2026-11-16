@@ -1,1 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard | Bookings</title>
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body class="admin-body">
+
+  <!-- ============ TOP BAR ============ -->
+  <header class="bg-white border-b border-slate-100 sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4 px-4 md:px-8 py-4">
+      <div class="flex items-center gap-3">
+        <div id="brandIcon" class="brand-icon"></div>
+        <div class="leading-tight">
+          <p id="brandName" class="font-extrabold text-slate-900"></p>
+          <p class="text-xs text-slate-500">Admin Dashboard</p>
+        </div>
+      </div>
+      <a href="index.html" class="text-sm font-semibold text-slate-600 hover:text-accent flex items-center gap-2">
+        <i data-lucide="external-link" class="w-4 h-4"></i> View booking page
+      </a>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 md:px-8 py-8 space-y-8">
+
+    <!-- ============ SUMMARY CARDS ============ -->
+    <section class="grid grid-cols-1 md:grid-cols-4 gap-5">
+      <div class="card p-5">
+        <p class="text-xs uppercase tracking-wider text-slate-500 font-semibold">Today's bookings</p>
+        <p id="stat-today" class="text-3xl font-extrabold text-slate-900 mt-2">0</p>
+      </div>
+      <div class="card p-5">
+        <p class="text-xs uppercase tracking-wider text-slate-500 font-semibold">Pending</p>
+        <p id="stat-pending" class="text-3xl font-extrabold text-amber-600 mt-2">0</p>
+      </div>
+      <div class="card p-5">
+        <p class="text-xs uppercase tracking-wider text-slate-500 font-semibold">Confirmed</p>
+        <p id="stat-confirmed" class="text-3xl font-extrabold text-emerald-600 mt-2">0</p>
+      </div>
+      <div class="card p-5">
+        <p class="text-xs uppercase tracking-wider text-slate-500 font-semibold">Revenue (completed)</p>
+        <p id="stat-revenue" class="text-3xl font-extrabold text-slate-900 mt-2">$0</p>
+      </div>
+    </section>
+
+    <!-- ============ BOOKINGS TABLE ============ -->
+    <section class="card overflow-hidden">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-6 border-b border-slate-100">
+        <div>
+          <h2 class="font-bold text-slate-900 text-lg">All bookings</h2>
+          <p class="text-sm text-slate-500">Manage status, view details or delete a booking.</p>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-3">
+          <input id="searchInput" type="text" placeholder="Search name, phone or ref..." class="input md:w-64" />
+          <select id="statusFilter" class="input md:w-44">
+            <option value="all">All statuses</option>
+            <option value="Pending">Pending</option>
+            <option value="Confirmed">Confirmed</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+            <tr>
+              <th class="text-left px-6 py-3 font-semibold">Ref</th>
+              <th class="text-left px-6 py-3 font-semibold">Customer</th>
+              <th class="text-left px-6 py-3 font-semibold">Service</th>
+              <th class="text-left px-6 py-3 font-semibold">Date & Time</th>
+              <th class="text-left px-6 py-3 font-semibold">Status</th>
+              <th class="text-right px-6 py-3 font-semibold">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="bookingsTable" class="divide-y divide-slate-100"></tbody>
+        </table>
+        <div id="emptyState" class="hidden text-center py-16">
+          <i data-lucide="calendar-x" class="w-10 h-10 text-slate-300 mx-auto mb-3"></i>
+          <p class="text-slate-500">No bookings found.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SERVICES ============ -->
+    <section class="card p-6 md:p-8">
+      <h2 class="font-bold text-slate-900 text-lg">Services</h2>
+      <p class="text-sm text-slate-500 mb-6">Change price and duration. Changes are saved in this browser and shown on the booking page.</p>
+      <div id="servicesEditor" class="space-y-4"></div>
+      <div class="flex justify-end mt-6">
+        <button id="saveServices" class="btn-accent px-6 py-3 rounded-2xl font-semibold">Save services</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ DETAILS MODAL ============ -->
+  <div id="detailModal" class="modal">
+    <div class="card modal-panel p-7 max-w-lg w-full">
+      <div class="flex justify-between items-start">
+        <h3 class="text-xl font-extrabold text-slate-900">Booking details</h3>
+        <button id="closeDetail" class="p-2 rounded-lg hover:bg-slate-100"><i data-lucide="x" class="w-5 h-5 text-slate-500"></i></button>
+      </div>
+      <div id="detailBody" class="mt-6 space-y-3 text-sm"></div>
+    </div>
+  </div>
+
+  <!-- ============ CONFIRM MODAL ============ -->
+  <div id="confirmModal" class="modal">
+    <div class="card modal-panel p-7 max-w-md w-full">
+      <h3 id="confirmTitle" class="text-lg font-extrabold text-slate-900">Are you sure?</h3>
+      <p id="confirmMessage" class="text-sm text-slate-500 mt-2"></p>
+      <div class="flex justify-end gap-3 mt-6">
+        <button id="confirmCancel" class="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100">Cancel</button>
+        <button id="confirmOk" class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-rose-500 hover:bg-rose-600 text-white">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastContainer" class="fixed bottom-6 right-6 z-[130] space-y-3"></div>
+
+  <!-- Config is shared with the booking page -->
+  <script src="js/app.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
