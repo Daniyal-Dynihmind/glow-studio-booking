@@ -181,6 +181,9 @@ function renderAll() {
   lucide.createIcons();
 }
 
+// Only run booking-page logic when the booking page is present
+const isBookingPage = !!document.getElementById('bookingForm');
+
 /* ============ EVENTS ============ */
 document.getElementById('serviceGrid').addEventListener('click', e => {
   const card = e.target.closest('[data-service]');
@@ -269,7 +272,9 @@ document.getElementById('successModal').addEventListener('click', e => {
 });
 
 /* ============ INIT ============ */
-renderBrand();
-document.getElementById('dateInput').min = todayStr();
-renderAll();
-lucide.createIcons();
+if (isBookingPage) {
+  renderBrand();
+  document.getElementById('dateInput').min = todayStr();
+  renderAll();
+  lucide.createIcons();
+}
