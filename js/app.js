@@ -1,8 +1,8 @@
 /* =========================================================
-   BOOKING APP - Logic
+   BOOKING APP - Logic (Glow Studio)
    ========================================================= */
 
-/* ============ CONFIG (change this per business) ============ */
+/* ============ CONFIG (Glow Studio) ============ */
 const CONFIG = {
   slug: 'glow-studio',
   name: 'Glow Studio',
@@ -12,10 +12,10 @@ const CONFIG = {
   phone: '+1 555 000 1234',
   address: '123 Beauty Lane, New York',
   currency: '$',
-  openTime: '10:00',     // opening time (24h format)
-  closeTime: '20:00',    // closing time (24h format)
-  slotMinutes: 60,       // gap between two slots (minutes)
-  closedDays: [0, 6],       // 0 = Sunday, 6 = Saturday
+  openTime: '10:00',
+  closeTime: '20:00',
+  slotMinutes: 60,
+  closedDays: [0],
   icon: 'sparkles',
   accent: '#e11d74',
   accentSoft: '#fde7f1',
@@ -30,6 +30,7 @@ const CONFIG = {
 
 /* ============ STORAGE ============ */
 const STORE_KEY = 'booking_' + CONFIG.slug;
+const SERVICES_KEY = 'services_' + CONFIG.slug;
 
 function getBookings() {
   return JSON.parse(localStorage.getItem(STORE_KEY) || '[]');
@@ -37,6 +38,17 @@ function getBookings() {
 function saveBookings(list) {
   localStorage.setItem(STORE_KEY, JSON.stringify(list));
 }
+
+// Apply saved service edits (price/duration) from the admin page
+(function loadServiceOverrides() {
+  const saved = localStorage.getItem(SERVICES_KEY);
+  if (!saved) return;
+  const list = JSON.parse(saved);
+  CONFIG.services.forEach(s => {
+    const o = list.find(x => x.id === s.id);
+    if (o) { s.duration = o.duration; s.price = o.price; }
+  });
+})();
 
 /* ============ HELPERS ============ */
 function toMin(t) {
@@ -51,7 +63,7 @@ function fmtTime(min) {
   return `${h}:${String(m).padStart(2, '0')} ${ap}`;
 }
 function todayStr() {
-  return new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD in local time
+  return new Date().toLocaleDateString('en-CA');
 }
 function fmtDate(s) {
   return new Date(s + 'T00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
@@ -73,12 +85,7 @@ function showToast(message, type = 'success') {
   setTimeout(() => el.remove(), 2800);
 }
 
-/* ============ STATE ============ */
-let state = { serviceId: null, date: '', start: null };
-
 /* ============ SLOT ENGINE ============ */
-// Returns null if the clinic/salon is closed that day.
-// Otherwise returns a list of slots: { start, available }
 function getSlots(dateStr, duration) {
   const day = new Date(dateStr + 'T00:00').getDay();
   if (CONFIG.closedDays.includes(day)) return null;
@@ -94,14 +101,16 @@ function getSlots(dateStr, duration) {
   const slots = [];
   for (let s = open; s + duration <= close; s += CONFIG.slotMinutes) {
     const passed = isToday && s <= nowMin;
-    // Overlap check: the new booking must not overlap any existing booking
     const clash = bookings.some(b => s < b.start + b.duration && b.start < s + duration);
     slots.push({ start: s, available: !passed && !clash });
   }
   return slots;
 }
 
-/* ============ RENDER: BRAND ============ */
+/* ============ BOOKING PAGE ONLY ============ */
+const isBookingPage = !!document.getElementById('bookingForm');
+let state = { serviceId: null, date: '', start: null };
+
 function renderBrand() {
   document.title = `${CONFIG.name} | Book Online`;
   const root = document.documentElement.style;
@@ -122,7 +131,6 @@ function renderBrand() {
   document.getElementById('footerName').textContent = CONFIG.name;
 }
 
-/* ============ RENDER: SERVICES ============ */
 function renderServices() {
   document.getElementById('serviceGrid').innerHTML = CONFIG.services.map(s => `
     <button type="button" data-service="${s.id}" class="service-card ${state.serviceId === s.id ? 'selected' : ''}">
@@ -140,7 +148,6 @@ function renderServices() {
     </button>`).join('');
 }
 
-/* ============ RENDER: SLOTS ============ */
 function renderSlots() {
   const grid = document.getElementById('slotGrid');
   const note = document.getElementById('slotNote');
@@ -164,7 +171,6 @@ function renderSlots() {
       ${s.available ? '' : 'disabled'}>${fmtTime(s.start)}</button>`).join('');
 }
 
-/* ============ RENDER: SUMMARY ============ */
 function renderSummary() {
   const svc = getService(state.serviceId);
   document.getElementById('sumService').textContent = svc ? svc.name : '—';
@@ -181,98 +187,90 @@ function renderAll() {
   lucide.createIcons();
 }
 
-// Only run booking-page logic when the booking page is present
-const isBookingPage = !!document.getElementById('bookingForm');
-
-/* ============ EVENTS ============ */
-document.getElementById('serviceGrid').addEventListener('click', e => {
-  const card = e.target.closest('[data-service]');
-  if (!card) return;
-  state.serviceId = card.dataset.service;
-  state.start = null;
-  renderAll();
-});
-
-document.getElementById('dateInput').addEventListener('change', e => {
-  state.date = e.target.value;
-  state.start = null;
-  renderAll();
-});
-
-document.getElementById('slotGrid').addEventListener('click', e => {
-  const btn = e.target.closest('[data-start]');
-  if (!btn || btn.disabled) return;
-  state.start = Number(btn.dataset.start);
-  renderAll();
-});
-
-document.getElementById('bookingForm').addEventListener('submit', e => {
-  e.preventDefault();
-  const svc = getService(state.serviceId);
-  if (!svc) return showToast('Please select a service.', 'error');
-  if (!state.date) return showToast('Please pick a date.', 'error');
-  if (state.start === null) return showToast('Please pick a time slot.', 'error');
-
-  // Double-check the slot is still free (someone else may have booked it)
-  const slot = (getSlots(state.date, svc.duration) || []).find(s => s.start === state.start);
-  if (!slot || !slot.available) {
-    showToast('Sorry, this slot was just taken. Please choose another.', 'error');
+if (isBookingPage) {
+  document.getElementById('serviceGrid').addEventListener('click', e => {
+    const card = e.target.closest('[data-service]');
+    if (!card) return;
+    state.serviceId = card.dataset.service;
     state.start = null;
     renderAll();
-    return;
-  }
+  });
 
-  const form = e.target;
-  const fd = Object.fromEntries(new FormData(form).entries());
-  const ref = CONFIG.refPrefix + '-' + Date.now().toString().slice(-6);
+  document.getElementById('dateInput').addEventListener('change', e => {
+    state.date = e.target.value;
+    state.start = null;
+    renderAll();
+  });
 
-  const booking = {
-    ref,
-    serviceId: svc.id,
-    serviceName: svc.name,
-    price: svc.price,
-    date: state.date,
-    start: state.start,
-    duration: svc.duration,
-    name: fd.name.trim(),
-    phone: fd.phone.trim(),
-    email: (fd.email || '').trim(),
-    notes: (fd.notes || '').trim(),
-    status: 'Pending',
-    createdAt: new Date().toISOString()
-  };
+  document.getElementById('slotGrid').addEventListener('click', e => {
+    const btn = e.target.closest('[data-start]');
+    if (!btn || btn.disabled) return;
+    state.start = Number(btn.dataset.start);
+    renderAll();
+  });
 
-  const list = getBookings();
-  list.push(booking);
-  saveBookings(list);
+  document.getElementById('bookingForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const svc = getService(state.serviceId);
+    if (!svc) return showToast('Please select a service.', 'error');
+    if (!state.date) return showToast('Please pick a date.', 'error');
+    if (state.start === null) return showToast('Please pick a time slot.', 'error');
 
-  // Show success popup
-  document.getElementById('refCode').textContent = ref;
-  document.getElementById('successDetails').innerHTML = `
-    <div class="flex justify-between"><span class="text-slate-500">Service</span><span class="font-semibold text-slate-900">${esc(svc.name)}</span></div>
-    <div class="flex justify-between"><span class="text-slate-500">Date</span><span class="font-semibold text-slate-900">${fmtDate(state.date)}</span></div>
-    <div class="flex justify-between"><span class="text-slate-500">Time</span><span class="font-semibold text-slate-900">${fmtTime(state.start)}</span></div>
-    <div class="flex justify-between"><span class="text-slate-500">Name</span><span class="font-semibold text-slate-900">${esc(booking.name)}</span></div>
-    <div class="flex justify-between"><span class="text-slate-500">Status</span><span class="font-semibold text-amber-600">Pending confirmation</span></div>`;
-  document.getElementById('successModal').classList.add('open');
-  lucide.createIcons();
+    const slot = (getSlots(state.date, svc.duration) || []).find(s => s.start === state.start);
+    if (!slot || !slot.available) {
+      showToast('Sorry, this slot was just taken. Please choose another.', 'error');
+      state.start = null;
+      renderAll();
+      return;
+    }
 
-  // Reset form and selection
-  form.reset();
-  state = { serviceId: null, date: '', start: null };
-  document.getElementById('dateInput').value = '';
-  renderAll();
-});
+    const form = e.target;
+    const fd = Object.fromEntries(new FormData(form).entries());
+    const ref = CONFIG.refPrefix + '-' + Date.now().toString().slice(-6);
 
-document.getElementById('closeSuccess').addEventListener('click', () => {
-  document.getElementById('successModal').classList.remove('open');
-});
-document.getElementById('successModal').addEventListener('click', e => {
-  if (e.target.id === 'successModal') e.target.classList.remove('open');
-});
+    const booking = {
+      ref,
+      serviceId: svc.id,
+      serviceName: svc.name,
+      price: svc.price,
+      date: state.date,
+      start: state.start,
+      duration: svc.duration,
+      name: fd.name.trim(),
+      phone: fd.phone.trim(),
+      email: (fd.email || '').trim(),
+      notes: (fd.notes || '').trim(),
+      status: 'Pending',
+      createdAt: new Date().toISOString()
+    };
 
-/* ============ INIT ============ */
-if (isBookingPage) {
+    const list = getBookings();
+    list.push(booking);
+    saveBookings(list);
+
+    document.getElementById('refCode').textContent = ref;
+    document.getElementById('successDetails').innerHTML = `
+      <div class="flex justify-between"><span class="text-slate-500">Service</span><span class="font-semibold text-slate-900">${esc(svc.name)}</span></div>
+      <div class="flex justify-between"><span class="text-slate-500">Date</span><span class="font-semibold text-slate-900">${fmtDate(state.date)}</span></div>
+      <div class="flex justify-between"><span class="text-slate-500">Time</span><span class="font-semibold text-slate-900">${fmtTime(state.start)}</span></div>
+      <div class="flex justify-between"><span class="text-slate-500">Name</span><span class="font-semibold text-slate-900">${esc(booking.name)}</span></div>
+      <div class="flex justify-between"><span class="text-slate-500">Status</span><span class="font-semibold text-amber-600">Pending confirmation</span></div>`;
+    document.getElementById('successModal').classList.add('open');
+    lucide.createIcons();
+
+    form.reset();
+    state = { serviceId: null, date: '', start: null };
+    document.getElementById('dateInput').value = '';
+    renderAll();
+  });
+
+  document.getElementById('closeSuccess').addEventListener('click', () => {
+    document.getElementById('successModal').classList.remove('open');
+  });
+  document.getElementById('successModal').addEventListener('click', e => {
+    if (e.target.id === 'successModal') e.target.classList.remove('open');
+  });
+
   renderBrand();
   document.getElementById('dateInput').min = todayStr();
   renderAll();
